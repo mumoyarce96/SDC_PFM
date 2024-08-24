@@ -18,15 +18,15 @@ def get_matches_info(tournament_id, season_id):
       time.sleep(random.uniform(1,3))
       fecha = requests.request("GET", url, headers={}, data = {}).json()
       if 'error' not in fecha.keys():
-          for partido in fecha['events']:
+          for match in fecha['events']:
               rounds.append(round)
-              home_teams.append(partido['homeTeam']['name'])
-              home_team_ids.append(partido['homeTeam']['id'])
-              away_teams.append(partido['awayTeam']['name'])
-              away_team_ids.append(partido['awayTeam']['id'])
-              match_ids.append(partido['id'])
+              home_teams.append(match['homeTeam']['name'])
+              home_team_ids.append(match['homeTeam']['id'])
+              away_teams.append(match['awayTeam']['name'])
+              away_team_ids.append(match['awayTeam']['id'])
+              match_ids.append(match['id'])
 
-    partidos = pd.DataFrame({
+    matches = pd.DataFrame({
               'round': rounds,
               'match_id': match_ids,
               'home_team': home_teams,
@@ -35,20 +35,20 @@ def get_matches_info(tournament_id, season_id):
               'away_team_id': away_team_ids
               })
 
-    partidos['season_id'] = season_id
-    partidos['tournament_id'] = tournament_id
-    return partidos
+    matches['season_id'] = season_id
+    matches['tournament_id'] = tournament_id
+    return matches
 
 def save_matches_info(tournament_id, season_ids):
     for season_id in season_ids:
       try: 
-          partidos_previos = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
-          partidos = get_matches_info(tournament_id, season_id)
-          final_partidos = pd.concat([partidos, partidos_previos]).drop_duplicates()
-          final_partidos.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
+          previous_matches = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
+          matches = get_matches_info(tournament_id, season_id)
+          final_matches = pd.concat([matches, previous_matches]).drop_duplicates()
+          final_matches.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
       except:
-          partidos = get_matches_info(tournament_id, season_id)
-          partidos.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
+          matches = get_matches_info(tournament_id, season_id)
+          matches.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
 
 def get_new_matches(tournament_id, season_id):
     matches = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
