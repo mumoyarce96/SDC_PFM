@@ -60,7 +60,7 @@ def get_new_matches(tournament_id, season_id):
       previous_matches = []
     match_ids = matches[(matches['season_id'] == season_id)]['match_id']
     match_ids = [match_id for match_id in match_ids if match_id not in previous_matches]
-    new_matches = matches[matches['match_ids'].isin(match_ids)]
+    new_matches = matches[matches['match_id'].isin(match_ids)]
     return previous_df, new_matches
 
 def parse_player_info(player_info, home, match_id, team):
