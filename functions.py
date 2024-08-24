@@ -17,7 +17,7 @@ def get_matches_info(tournament_id, season_id):
     for round in range(1, n_rounds + 1):
       url = f'https://api.sofascore.com/api/v1/unique-tournament/{tournament_id}/season/{season_id}/events/round/{round}'
       time.sleep(random.uniform(1,3))
-      requests.request("GET", url, headers={}, data = {}).json()
+      fecha = requests.request("GET", url, headers={}, data = {}).json()
       if 'error' not in fecha.keys():
           for partido in fecha['events']:
               rounds.append(round)
