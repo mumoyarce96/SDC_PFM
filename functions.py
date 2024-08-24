@@ -3,7 +3,7 @@ import requests
 import random
 import time
 
-FILES_PATH = 'https://raw.githubusercontent.com/mumoyarce96/SDC_PFM/data/'
+FILES_PATH = 'data/'
 def get_matches_info(tournament_id, season_id):
     rounds = []
     match_ids = []
