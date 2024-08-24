@@ -97,14 +97,14 @@ def get_player_stats(matches, previous_df):
                 df = parse_player_info(player_info, True, match_id, home_team)
                 dfs.append(df)
       
-          df = pd.concat(dfs).reset_index(drop = True)
-          cols = ['player_id', 'player_position', 'player_name']
-          for col in cols:
-              first_column = df.pop(col)
-              df.insert(0, col, first_column)
-          df = df.fillna(0)
-          df = pd.concat([previous_df, df]).drop_duplicates()
-          return df
+      df = pd.concat(dfs).reset_index(drop = True)
+      cols = ['player_id', 'player_position', 'player_name']
+      for col in cols:
+          first_column = df.pop(col)
+          df.insert(0, col, first_column)
+      df = df.fillna(0)
+      df = pd.concat([previous_df, df]).drop_duplicates()
+      return df
 
 def save_player_stats(tournament_id, season_id):
       previous_df, matches = get_new_matches(tournament_id, season_id)
