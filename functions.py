@@ -50,7 +50,7 @@ def save_matches_info(tournament_id, season_ids):
           partidos = get_matches_info(tournament_id, season_id)
           partidos.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
 
-def get_new_matches_ids(tournament_id, season_id):
+def get_new_matches(tournament_id, season_id):
     matches = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
     try:
       previous_df = pd.read_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
@@ -60,7 +60,8 @@ def get_new_matches_ids(tournament_id, season_id):
       previous_matches = []
     match_ids = matches[(matches['season_id'] == season_id)]['match_id']
     match_ids = [match_id for match_id in match_ids if match_id not in previous_matches]
-    return previous_df, match_ids 
+    new_matches = matches[matches['match_ids'].isin(match_ids)]
+    return previous_df, new_matches
 
 def parse_player_info(player_info, home, match_id, team):
     if 'statistics' in player_info.keys():
@@ -77,8 +78,9 @@ def parse_player_info(player_info, home, match_id, team):
         df['team'] = team
         return df
 
-def get_player_stats(match_ids, previous_df):
+def get_player_stats(matches, previous_df):
       dfs = []
+      match_ids = matches['match_id'].unique()
       for i, match_id in enumerate(match_ids):
           response = requests.request("GET", f'https://api.sofascore.com/api/v1/event/{match_id}/lineups', headers={}, data = {})
           time.sleep(random.uniform(0.5, 1.5))
@@ -105,8 +107,8 @@ def get_player_stats(match_ids, previous_df):
           return df
 
 def save_player_stats(tournament_id, season_id):
-      previous_df, match_ids = get_new_matches_ids(tournament_id, season_id)
-      df = get_player_stats(match_ids, previous_df)
+      previous_df, matches = get_new_matches(tournament_id, season_id)
+      df = get_player_stats(matches, previous_df)
       df.to_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
 
 def save_player_positions(tournament_id, season_id):
