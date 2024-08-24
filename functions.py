@@ -69,7 +69,7 @@ def parse_player_info(player_info, home, match_id, team):
       if 'minutesPlayed' in stats.keys() and stats['minutesPlayed'] >= 15:
         if 'ratingVersions' in stats.keys():
           stats.pop('ratingVersions')
-        df = pd.DataFrame(stats, index = 0)
+        df = pd.DataFrame(stats, index = [0])
         df['player_name'] = player['player']['name']
         df['player_id'] = player['player']['id']
         df['player_position'] = player['position']
