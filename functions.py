@@ -90,10 +90,10 @@ def get_player_stats(matches, previous_df):
           if response.status_code == 200:
             home_players = response.json()['home']['players']
             away_players = response.json()['away']['players']
-            for i, player in enumerate(home_players):
+            for i, player_info in enumerate(home_players):
                 df = parse_player_info(player_info, True, match_id, home_team)
                 dfs.append(df)
-            for i, player in enumerate(away_players):
+            for i, player_info in enumerate(away_players):
                 df = parse_player_info(player_info, True, match_id, home_team)
                 dfs.append(df)
       
