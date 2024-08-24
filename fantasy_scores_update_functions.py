@@ -50,7 +50,7 @@ def normalize_df(df):
 def get_fantasy_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position):    
     player_stats_df = normalize_df(player_stats_df)
     unscored_players = get_unscored_rows(player_stats_df, player_positions_df, previous_scores, position).drop('team', axis = 1)
-    importances_df = importances_df[importances_df['position'] == position].drop(['position', 'description', axis = 1)
+    importances_df = importances_df[importances_df['position'] == position].drop(['position', 'description'], axis = 1)
     scores = []
     for i, player_row in unscored_players.drop(not_stats_columns, axis = 1).iterrows():
           scores.append((player_row * importances).sum(axis = 1).values[0])
