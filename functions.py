@@ -116,8 +116,10 @@ def save_player_positions(tournament_id, season_id):
         previous_df = pd.read_parquet(f"data/Player Positions/{tournament_id}_player_positions.parquet")
       except:
         previous_df = pd.DataFrame()
+      matches_info = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
+      match_ids = matches_info[matches_info['season_id'] == season_id]['match_id'].unique()
       player_stats = pd.read_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
-      player_ids = player_stats[(player_stats['season_id'] == season_id)]['player_id'].unique()
+      player_ids = player_stats[(player_stats['match_id'].isin(matches_id)]['player_id'].unique()
       positions = []
       fetched_player_ids = []
       for i, player_id in enumerate(player_ids):
