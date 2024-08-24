@@ -30,7 +30,7 @@ jobs:
       - run: |
           git config user.name 'GitHub Actions'
           git config user.email 'actions@users.noreply.github.com'
-          git add data/Matches/{tournament_id}_matches.parquet
+          git add data/Matches/11653_matches.parquet
           timestamp=$(date -u)
           git commit -m "update matches data: ${timestamp}" || exit 0
           git push
