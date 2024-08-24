@@ -69,7 +69,7 @@ def parse_player_info(player_info, home, match_id, team):
       if 'minutesPlayed' in stats.keys() and stats['minutesPlayed'] >= 15:
         if 'ratingVersions' in stats.keys():
           stats.pop('ratingVersions')
-        df = pd.DataFrame(stats, index = [i])
+        df = pd.DataFrame(stats, index = 0)
         df['player_name'] = player['player']['name']
         df['player_id'] = player['player']['id']
         df['player_position'] = player['position']
@@ -90,10 +90,10 @@ def get_player_stats(matches, previous_df):
           if response.status_code == 200:
             home_players = response.json()['home']['players']
             away_players = response.json()['away']['players']
-            for i, player_info in enumerate(home_players):
+            for player_info in home_players:
                 df = parse_player_info(player_info, True, match_id, home_team)
                 dfs.append(df)
-            for i, player_info in enumerate(away_players):
+            for player_info in away_players:
                 df = parse_player_info(player_info, True, match_id, home_team)
                 dfs.append(df)
       
@@ -103,7 +103,7 @@ def get_player_stats(matches, previous_df):
           first_column = df.pop(col)
           df.insert(0, col, first_column)
       df = df.fillna(0)
-      df = pd.concat([previous_df, df]).drop_duplicates()
+      df = pd.concat([previous_df, df]).drop_duplicates().reset_index(drop = True)
       return df
 
 def save_player_stats(tournament_id, season_id):
