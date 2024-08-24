@@ -1,6 +1,5 @@
 import pandas as pd
 import requests
-import os
 import random
 import time
 
@@ -42,21 +41,21 @@ def get_matches_info(tournament_id, season_id):
 
 def save_matches_info(tournament_id, season_ids):
     for season_id in season_ids:
-      if os.path.isfile(f"data/Matches/{tournament_id}_matches.parquet"):
+      try:
           partidos_previos = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
           partidos = get_matches_info(tournament_id, season_id)
           final_partidos = pd.concat([partidos, partidos_previos]).drop_duplicates()
           final_partidos.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
-      else:
+      except:
           partidos = get_matches_info(tournament_id, season_id)
           partidos.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
 
 def get_new_matches_ids(tournament_id, season_id):
     matches = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
-    if os.path.isfile(f"data/Player Stats/{tournament_id}_player_stats.parquet"):
+    try:
       previous_df = pd.read_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
       previous_matches = previous_df['match_id'].unique()
-    else:
+    except:
       previuos_matches = []
     match_ids = matches[(matches['season_id'] == season_id)]['match_id']
     match_ids = [match_id for match_id in match_ids if match_id not in previous_matches]
@@ -110,9 +109,9 @@ def save_player_stats(tournament_id, season_id):
       df.to_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
 
 def save_player_positions(tournament_id, season_id):
-      if os.path.isfile(f"data/Player Positions/{tournament_id}_player_positions.parquet"):
+      try:
         previous_df = pd.read_parquet(f"data/Player Positions/{tournament_id}_player_positions.parquet")
-      else:
+      except:
         previous_df = pd.DataFrame()
       player_stats = pd.read_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
       player_ids = player_stats[(player_stats['season_id'] == season_id)]['player_id'].unique()
