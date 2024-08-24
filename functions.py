@@ -3,7 +3,6 @@ import requests
 import random
 import time
 
-FILES_PATH = 'data/'
 def get_matches_info(tournament_id, season_id):
     rounds = []
     match_ids = []
@@ -43,7 +42,7 @@ def get_matches_info(tournament_id, season_id):
 def save_matches_info(tournament_id, season_ids):
     for season_id in season_ids:
       try: 
-          partidos_previos = pd.read_parquet(f"{FILES_PATH}Matches/{tournament_id}_matches.parquet")
+          partidos_previos = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
           partidos = get_matches_info(tournament_id, season_id)
           final_partidos = pd.concat([partidos, partidos_previos]).drop_duplicates()
           final_partidos.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
@@ -52,11 +51,12 @@ def save_matches_info(tournament_id, season_ids):
           partidos.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
 
 def get_new_matches_ids(tournament_id, season_id):
-    matches = pd.read_parquet(f"{FILES_PATH}/Matches/{tournament_id}_matches.parquet")
+    matches = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
     try:
-      previous_df = pd.read_parquet(f"{FILES_PATH}/Player Stats/{tournament_id}_player_stats.parquet")
+      previous_df = pd.read_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
       previous_matches = previous_df['match_id'].unique()
     except:
+      previous_df = pd.DataFrame()
       previous_matches = []
     match_ids = matches[(matches['season_id'] == season_id)]['match_id']
     match_ids = [match_id for match_id in match_ids if match_id not in previous_matches]
@@ -111,10 +111,10 @@ def save_player_stats(tournament_id, season_id):
 
 def save_player_positions(tournament_id, season_id):
       try:
-        previous_df = pd.read_parquet(f"{FILES_PATH}/Player Positions/{tournament_id}_player_positions.parquet")
+        previous_df = pd.read_parquet(f"data/Player Positions/{tournament_id}_player_positions.parquet")
       except:
         previous_df = pd.DataFrame()
-      player_stats = pd.read_parquet(f"{FILES_PATH}/Player Stats/{tournament_id}_player_stats.parquet")
+      player_stats = pd.read_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
       player_ids = player_stats[(player_stats['season_id'] == season_id)]['player_id'].unique()
       positions = []
       fetched_player_ids = []
