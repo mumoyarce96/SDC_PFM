@@ -6,7 +6,7 @@ on:
     - cron: '00 1 * * 1'  # At 01:00 on Mondays.
 
 jobs:
-  job-name:  Update matches data
+  job-name: 
     permissions:
       contents: write
   update:
