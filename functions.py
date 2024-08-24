@@ -12,12 +12,12 @@ def get_matches_info(tournament_id, season_id):
     home_team_ids = []
     away_team_ids = []
     url = f'https://api.sofascore.com/api/v1/unique-tournament/{tournament_id}/season/{season_id}/rounds' 
-    response = requests.get(url, headers=headers).json()
+    response = requests.request("GET", url, headers={}, data = {}).json()
     n_rounds = len(response['rounds'])
     for round in range(1, n_rounds + 1):
       url = f'https://api.sofascore.com/api/v1/unique-tournament/{tournament_id}/season/{season_id}/events/round/{round}'
       time.sleep(random.uniform(1,3))
-      fecha = requests.get(url, headers=headers).json()
+      requests.request("GET", url, headers={}, data = {}).json()
       if 'error' not in fecha.keys():
           for partido in fecha['events']:
               rounds.append(round)
