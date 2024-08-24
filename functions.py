@@ -70,9 +70,9 @@ def parse_player_info(player_info, home, match_id, team):
         if 'ratingVersions' in stats.keys():
           stats.pop('ratingVersions')
         df = pd.DataFrame(stats, index = [0])
-        df['player_name'] = player['player']['name']
-        df['player_id'] = player['player']['id']
-        df['player_position'] = player['position']
+        df['player_name'] = player_info['player']['name']
+        df['player_id'] = player_info['player']['id']
+        df['player_position'] = player_info['position']
         df['home'] = home
         df['match_id'] = match_id
         df['team'] = team
