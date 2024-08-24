@@ -56,7 +56,7 @@ def get_new_matches_ids(tournament_id, season_id):
       previous_df = pd.read_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
       previous_matches = previous_df['match_id'].unique()
     except:
-      previuos_matches = []
+      previous_matches = []
     match_ids = matches[(matches['season_id'] == season_id)]['match_id']
     match_ids = [match_id for match_id in match_ids if match_id not in previous_matches]
     return previous_df, match_ids 
