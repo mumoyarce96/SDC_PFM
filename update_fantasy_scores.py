@@ -17,6 +17,5 @@ for position in previous_scores['position']:
    temp_df = fantasy_scores_output(player_stats_df, player_positions_df, previous_scores, importances_df, matches_df, position)
    final_output = pd.concat([final_output, temp_df])
 
-if len(final_output) > len(previous_scores):
-   final_output.to_parquet(f'data/Fantasy Scores/{tournament_id}_fantasy_scores.parquet')
+final_output.to_parquet(f'data/Fantasy Scores/{tournament_id}_fantasy_scores.parquet')
 
