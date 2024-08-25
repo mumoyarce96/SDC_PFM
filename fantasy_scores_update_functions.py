@@ -68,3 +68,9 @@ def calculate_final_scores(player_stats_df, player_positions_df, previous_scores
     stats_df['final_score'] = (stats_df['percentile'] + stats_df['final_score'])/2
     stats_df['position'] = position
     return stats_df[stats_df['match_id'].isin(new_scores['match_id'])]
+
+def fantasy_scores_output(player_stats_df, player_positions_df, previous_scores, importances_df, matches_df, position):
+    new_scores = calculate_final_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position)
+    output = pd.merge(player_stats_df, new_scores[['match_id', 'player_id', 'score', 'final_score', 'position']], on = ['match_id', 'player_id'], how = 'left').dropna(subset = 'player_name')
+    output = pd.merge(output, matches_df[['match_id', 'season_id', 'round']], on = ['match_id'], how = 'left')[['match_id', 'player_name', 'team', 'score', 'final_score', 'position', 'season_id', 'round']]
+    return output
