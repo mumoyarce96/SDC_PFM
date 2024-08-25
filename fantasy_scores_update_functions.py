@@ -1,6 +1,6 @@
 import pandas as pd
 
-not_stats_columns = ['player_name', 'player_position', 'player_id', 'match_id', 'minutesPlayed', 'team' ,'home', 'rating']
+not_stats_columns = ['player_name', 'player_position', 'player_id', 'match_id', 'minutesPlayed','home', 'rating']
 position_candidates_map = {
   'GK': ['G'],
   'DR': ['M', 'D'],
@@ -44,7 +44,7 @@ def get_unscored_rows(player_stats_df, player_positions_df, previous_scores, pos
 
 def normalize_df(df):
     for column in df.columns:
-      if column not in not_stats_columns:
+      if column not in not_stats_columns and column != team:
         df[column] = (df[column] - df[column].mean())/df[column].std()
     return df
 
