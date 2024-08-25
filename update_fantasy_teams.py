@@ -13,8 +13,7 @@ n_teams = last_season['team'].nunique()
 matches_played = last_season.groupby('round')['match_id'].nunique().reset_index()
 rounds = matches_played[matches_played['match_id'] < int(n_teams/2)]['round'].to_list()
 fantasy_scores = fantasy_scores[fantasy_scores['round'].isin(rounds)]
-new_fantasy_teams = get_new_fantasy_teams(fantasy_scores)
+new_fantasy_teams = get_new_fantasy_teams(fantasy_scores).drop('score', axis = 1)
 fantasy_teams = fantasy_teams[((fantasy_teams['season_id'] == last_season['season_id'].unique()[0]) & (fantasy_teams['round'].isin(rounds))) == False]
 output = pd.concat([fantasy_teams, new_fantasy_teams])
-print(len(output))
 output.to_parquet(f'data/Fantasy Teams/{tournament_id}_fantasy_teams.parquet')
