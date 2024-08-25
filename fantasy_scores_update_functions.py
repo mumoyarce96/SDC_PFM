@@ -1,7 +1,7 @@
 import pandas as pd
 
 not_stats_columns = ['player_name', 'player_position', 'player_id', 'match_id', 'minutesPlayed', 'team' ,'home', 'rating']
-position_canditates_map = {
+position_candidates_map = {
   'GK': ['G'],
   'DR': ['M', 'D'],
   'DL': ['M', 'D'],
