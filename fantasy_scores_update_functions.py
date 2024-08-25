@@ -44,7 +44,7 @@ def get_unscored_rows(player_stats_df, player_positions_df, previous_scores, pos
 
 def normalize_df(df):
     for column in df.columns:
-      if column not in not_stats_columns and column != team:
+      if column not in not_stats_columns and column != 'team':
         df[column] = (df[column] - df[column].mean())/df[column].std()
     return df
 
