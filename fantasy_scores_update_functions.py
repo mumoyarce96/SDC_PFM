@@ -54,7 +54,7 @@ def get_fantasy_scores(player_stats_df, player_positions_df, previous_scores, im
     importances_df = importances_df[importances_df['position'] == position].drop(['position', 'description'], axis = 1)
     scores = []
     for i, player_row in unscored_players.drop(not_stats_columns, axis = 1).iterrows():
-          scores.append((player_row * importances).sum(axis = 1).values[0])
+          scores.append((player_row * importances_df).sum(axis = 1).values[0])
     unscored_players['score'] = scores
     return unscored_players    
 
