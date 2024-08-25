@@ -11,5 +11,5 @@ except:
 importances_df = pd.read_csv('data/importancia_stats_por_posicion.csv')
 
 for position in previous_scores['position']:
-   get_fantasy_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position)
+   calculate_final_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position)
 
