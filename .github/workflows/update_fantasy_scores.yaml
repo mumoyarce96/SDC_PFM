@@ -1,4 +1,4 @@
-name: Update fantasy scores data
+name: Update fantasy scores
 
 on:
   workflow_dispatch: {}
