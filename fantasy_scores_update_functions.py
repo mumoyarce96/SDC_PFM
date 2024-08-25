@@ -37,7 +37,7 @@ def get_unscored_rows(player_stats_df, player_positions_df, previous_scores, pos
     match_ids = [match_id for match_id in player_stats_df['match_id'].unique() if match_id not in previous_scores['match_id']]
     player_stats_df = player_stats_df[player_stats_df['match_id'].isin(match_ids)]
     position_ids = get_player_ids_by_position(player_positions_df, position)
-    no_position_ids = positions_df[positions_df['positions'].apply(lambda x: len(x) == 0)]['player_id'].to_list()
+    no_position_ids = player_positions_df[player_positions_df['positions'].apply(lambda x: len(x) == 0)]['player_id'].to_list()
     player_stats_df = get_candidates(player_stats_df[player_stats_df['player_id'].isin(position_ids + no_position_ids)])
     return player_stats_df
 
