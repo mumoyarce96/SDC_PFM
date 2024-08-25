@@ -56,3 +56,15 @@ def get_fantasy_scores(player_stats_df, player_positions_df, previous_scores, im
           scores.append((player_row * importances).sum(axis = 1).values[0])
     unscored_players['score'] = scores
     return unscored_players    
+
+def calculate_final_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position):
+    cols = ['player_name', 'match_id', 'score']
+    new_scores = get_fantasy_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position)
+    stats_df = pd.concat([previous_scores[cols], new_scores[cols]])
+    stats_df['percentile'] = pd.qcut(stats_df['score'], q=100, labels=False)
+    min = 1
+    max = 99
+    stats_df['final_score'] = min + ((stats_df['score'] - stats_df['score'].min()) / (stats_df['score'].max() - stats_df['score'].min())) * (max - min)
+    stats_df['final_score'] = (stats_df['percentile'] + stats_df['final_score'])/2
+    stats_df['position'] = position
+    return stats_df[stats_df['match_id'].isin(new_scores['match_id'])]
