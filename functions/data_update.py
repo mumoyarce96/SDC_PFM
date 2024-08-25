@@ -81,9 +81,9 @@ def parse_player_info(player_info, home, match_id, team):
 def get_player_stats(matches, previous_df):
       dfs = []
       match_ids = matches['match_id'].unique()
-      for i, match_id in enumerate(match_ids):
+      for match_id in match_ids:
           response = requests.request("GET", f'https://api.sofascore.com/api/v1/event/{match_id}/lineups', headers={}, data = {})
-          time.sleep(random.uniform(0.5, 1.5))
+          time.sleep(random.uniform(0.5, 1.2))
           match_info = matches[matches['match_id'] == match_id].iloc[0]
           home_team = match_info['home_team']
           away_team = match_info['away_team']
@@ -94,7 +94,7 @@ def get_player_stats(matches, previous_df):
                 df = parse_player_info(player_info, True, match_id, home_team)
                 dfs.append(df)
             for player_info in away_players:
-                df = parse_player_info(player_info, True, match_id, home_team)
+                df = parse_player_info(player_info, False, match_id, away_team)
                 dfs.append(df)
       
       df = pd.concat(dfs).reset_index(drop = True)
@@ -108,7 +108,7 @@ def get_player_stats(matches, previous_df):
 
 def save_player_stats(tournament_id, season_id):
       previous_df, matches = get_new_matches(tournament_id, season_id)
-      df = get_player_stats(matches, previous_df)
+      df = get_player_stats(matches, previous_df).dropna(subset = 'player_name')
       df.to_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
 
 def save_player_positions(tournament_id, season_id):
@@ -127,7 +127,7 @@ def save_player_positions(tournament_id, season_id):
           try:
             response = requests.request("GET", url, headers={}, data = {}).json()
             positions.append(response['positions'])
-            time.sleep(random.uniform(0.5,1.2))
+            time.sleep(random.uniform(0.5,1.1))
           except:
             positions.append(None)
           fetched_player_ids.append(player_id)
@@ -136,4 +136,3 @@ def save_player_positions(tournament_id, season_id):
       df['fecha_carga'] = pd.to_datetime('today')
       df = pd.concat([previous_df, df]).sort_values(by = 'fecha_carga').drop_duplicates(subset = 'player_id', keep = 'last')
       df.to_parquet(f"data/Player Positions/{tournament_id}_player_positions.parquet")
-        

@@ -34,7 +34,7 @@ def get_candidates(player_stats_df, position):
     return player_stats_df[player_stats_df['player_position'].isin(list_of_positions)]
 
 def get_unscored_rows(player_stats_df, player_positions_df, previous_scores, position):
-    match_ids = [match_id for match_id in player_stats_df['match_id'].unique() if match_id not in previous_scores['match_id']]
+    match_ids = [match_id for match_id in player_stats_df['match_id'].unique() if match_id not in previous_scores['match_id'].to_list()]
     player_stats_df = player_stats_df[player_stats_df['match_id'].isin(match_ids)]
     position_ids = get_player_ids_by_position(player_positions_df, position)
     no_position_ids = player_positions_df[player_positions_df['positions'].apply(lambda x: len(x) == 0)]['player_id'].to_list()
@@ -72,6 +72,6 @@ def calculate_final_scores(player_stats_df, player_positions_df, previous_scores
 
 def fantasy_scores_output(player_stats_df, player_positions_df, previous_scores, importances_df, matches_df, position):
     new_scores = calculate_final_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position)
-    output = pd.merge(player_stats_df, new_scores[['match_id', 'player_id', 'score', 'final_score', 'position']], on = ['match_id', 'player_id'], how = 'left').dropna(subset = 'player_name')
+    output = pd.merge(player_stats_df, new_scores[['match_id', 'player_name', 'score', 'final_score', 'position']], on = ['match_id', 'player_name'], how = 'left').dropna(subset = 'score')
     output = pd.merge(output, matches_df[['match_id', 'season_id', 'round']], on = ['match_id'], how = 'left')[['match_id', 'player_name', 'team', 'score', 'final_score', 'position', 'season_id', 'round']]
     return output

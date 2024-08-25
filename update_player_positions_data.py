@@ -1,4 +1,4 @@
-from data_update_functions import *
+from functions.data_update import *
 
 tournament_id = 11653
 season_ids = [57883]
