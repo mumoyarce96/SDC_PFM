@@ -3,6 +3,25 @@ import requests
 import random
 import time
 
+headers = {
+    'authority': 'api.sofascore.com',
+    'accept': '*/*',
+    'accept-encoding': 'gzip, deflate, br, zstd',
+    'accept-language': 'es-419,es;q=0.9',
+    'cache-control': 'max-age=0',
+    'dnt': '1',
+    'if-none-match': 'W/"4bebed6144"',
+    'origin': 'https://www.sofascore.com',
+    'referer': 'https://www.sofascore.com/',
+    'sec-ch-ua': '"Chromium";v="122", "Not(A:Brand";v="24", "Google Chrome";v="122"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+    'sec-fetch-dest': 'empty',
+    'sec-fetch-mode': 'cors',
+    'sec-fetch-site': 'same-site',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
+}
+
 def get_matches_info(tournament_id, season_id):
     rounds = []
     match_ids = []
@@ -15,7 +34,7 @@ def get_matches_info(tournament_id, season_id):
     n_rounds = len(response['rounds'])
     for round in range(1, n_rounds + 1):
       url = f'https://api.sofascore.com/api/v1/unique-tournament/{tournament_id}/season/{season_id}/events/round/{round}'
-      time.sleep(random.uniform(1,3))
+      time.sleep(random.uniform(0.7, 1.3))
       fecha = requests.request("GET", url, headers={}, data = {}).json()
       if 'error' not in fecha.keys():
           for match in fecha['events']:
@@ -76,35 +95,51 @@ def parse_player_info(player_info, home, match_id, team):
         df['home'] = home
         df['match_id'] = match_id
         df['team'] = team
-        return df
+        return df.dropna(subset = 'player_name')
+    else:
+        return pd.DataFrame()  
 
-def get_player_stats(matches, previous_df):
+def parse_player_data_response(dfs, response, match_id, home_team, away_team):
+      if response.status_code == 200:
+        home_players = response.json()['home']['players']
+        away_players = response.json()['away']['players']
+        for player_info in home_players:
+            df = parse_player_info(player_info, True, match_id, home_team)
+            dfs.append(df)
+        for player_info in away_players:
+            df = parse_player_info(player_info, False, match_id, away_team)
+            dfs.append(df)
+      return dfs
+
+def get_match_player_stats(dfs, matches, match_id):
+        response = requests.request("GET", f'https://api.sofascore.com/api/v1/event/{match_id}/lineups', headers = headers, data = {})
+        match_info = matches[matches['match_id'] == match_id].iloc[0]
+        home_team = match_info['home_team']
+        away_team = match_info['away_team']
+        dfs = parse_player_data_response(dfs, response, match_id, home_team, away_team)
+        return dfs
+
+def get_player_stats(matches, previous_df, reruns = 0):
       dfs = []
       match_ids = matches['match_id'].unique()
       for match_id in match_ids:
-          response = requests.request("GET", f'https://api.sofascore.com/api/v1/event/{match_id}/lineups', headers={}, data = {})
-          time.sleep(random.uniform(0.5, 1.2))
-          match_info = matches[matches['match_id'] == match_id].iloc[0]
-          home_team = match_info['home_team']
-          away_team = match_info['away_team']
-          if response.status_code == 200:
-            home_players = response.json()['home']['players']
-            away_players = response.json()['away']['players']
-            for player_info in home_players:
-                df = parse_player_info(player_info, True, match_id, home_team)
-                dfs.append(df)
-            for player_info in away_players:
-                df = parse_player_info(player_info, False, match_id, away_team)
-                dfs.append(df)
-      
-      df = pd.concat(dfs).reset_index(drop = True)
-      cols = ['player_id', 'player_position', 'player_name']
-      for col in cols:
-          first_column = df.pop(col)
-          df.insert(0, col, first_column)
-      df = df.fillna(0)
-      df = pd.concat([previous_df, df]).drop_duplicates().reset_index(drop = True)
-      return df
+          get_match_player_stats(dfs, matches, match_id)
+          time.sleep(random.uniform(0.8, 1.2))
+          for i in range(reruns):
+              get_match_player_stats(dfs, matches, match_id)
+              time.sleep(random.uniform(0.5, 1))
+      if len(dfs) > 0:
+        print(len(dfs))
+        df = pd.concat(dfs, ignore_index = True)
+        cols = ['player_id', 'player_position', 'player_name']
+        for col in cols:
+            first_column = df.pop(col)
+            df.insert(0, col, first_column)
+        df = pd.concat([previous_df, df]).drop_duplicates(subset = ['match_id', 'player_name'], keep = 'last').reset_index(drop = True)
+        df = df.fillna(0)
+        return df
+      else: 
+        return previous_df
 
 def save_player_stats(tournament_id, season_id):
       previous_df, matches = get_new_matches(tournament_id, season_id)

@@ -1,6 +1,6 @@
 import pandas as pd
 
-not_stats_columns = ['player_name', 'player_position', 'player_id', 'match_id', 'minutesPlayed','home', 'rating']
+not_stats_columns = ['player_name', 'player_position', 'player_id', 'match_id', 'home']
 position_candidates_map = {
   'GK': ['G'],
   'DR': ['M', 'D'],
@@ -49,11 +49,17 @@ def normalize_df(df):
     return df
 
 def get_fantasy_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position):    
-    player_stats_df = normalize_df(player_stats_df)
     unscored_players = get_unscored_rows(player_stats_df, player_positions_df, previous_scores, position).drop('team', axis = 1)
+    # normalizacion debe ser con unscored + jugadores de  previous_scores en esa posicion
+    unscored_players = normalize_df(unscored_players)
+    print(len(unscored_players))
+    print(unscored_players[unscored_players['match_id'] == 11986405][['match_id', 'home', 'formation', 'player_name', 'player_position',
+       'player_id', 'totalPass', 'accuratePass',
+       'totalLongBalls', 'accurateLongBalls']])
     importances_df = importances_df[importances_df['position'] == position].drop(['position', 'description'], axis = 1)
     scores = []
-    for i, player_row in unscored_players.drop(not_stats_columns, axis = 1).iterrows():
+    for _, player_row in unscored_players.drop(not_stats_columns, axis = 1).iterrows():
+          # REVISAR QUE LA MULTIPLICACIÓN ESTÁ DANDO BIEN, NO DEBERÍA HABER PROBLEMA
           scores.append((player_row * importances_df).sum(axis = 1).values[0])
     unscored_players['score'] = scores
     return unscored_players    
@@ -65,13 +71,28 @@ def calculate_final_scores(player_stats_df, player_positions_df, previous_scores
     stats_df['percentile'] = pd.qcut(stats_df['score'], q=100, labels=False)
     min = 1
     max = 99
-    stats_df['final_score'] = min + ((stats_df['score'] - stats_df['score'].min()) / (stats_df['score'].max() - stats_df['score'].min())) * (max - min)
-    stats_df['final_score'] = (stats_df['percentile'] + stats_df['final_score'])/2
+    stats_df['minmax_score'] = min + ((stats_df['score'] - stats_df['score'].min()) / (stats_df['score'].max() - stats_df['score'].min())) * (max - min)
+    stats_df['final_score'] = (stats_df['percentile'] + stats_df['minmax_score'])/2
     stats_df['position'] = position
     return stats_df[stats_df['match_id'].isin(new_scores['match_id'])]
 
 def fantasy_scores_output(player_stats_df, player_positions_df, previous_scores, importances_df, matches_df, position):
+    player_stats_df = player_stats_df[['match_id', 'home', 'formation', 'player_name', 'player_position',
+       'player_id', 'team', 'totalPass', 'accuratePass',
+       'totalLongBalls', 'accurateLongBalls', 'goodHighClaim',
+       'savedShotsFromInsideTheBox', 'saves', 'touches', 'possessionLostCtrl',
+       'totalCross', 'aerialLost', 'duelLost', 'challengeLost', 'totalContest',
+       'interceptionWon', 'aerialWon', 'duelWon', 'totalClearance',
+       'outfielderBlock', 'totalTackle', 'wasFouled', 'dispossessed',
+       'totalOffside', 'wonContest', 'shotOffTarget', 'fouls', 'keyPass',
+       'accurateCross', 'onTargetScoringAttempt', 'blockedScoringAttempt',
+       'bigChanceMissed', 'punches', 'bigChanceCreated', 'goalAssist', 'goals',
+       'totalKeeperSweeper', 'accurateKeeperSweeper', 'hitWoodwork',
+       'clearanceOffLine', 'penaltyConceded', 'errorLeadToAGoal',
+       'penaltyMiss', 'ownGoals', 'penaltyWon', 'penaltySave',
+       'errorLeadToAShot', 'lastManTackle']]
+    
     new_scores = calculate_final_scores(player_stats_df, player_positions_df, previous_scores, importances_df, position)
-    output = pd.merge(player_stats_df, new_scores[['match_id', 'player_name', 'score', 'final_score', 'position']], on = ['match_id', 'player_name'], how = 'left').dropna(subset = 'score')
-    output = pd.merge(output, matches_df[['match_id', 'season_id', 'round']], on = ['match_id'], how = 'left')[['match_id', 'player_name', 'team', 'score', 'final_score', 'position', 'season_id', 'round']]
+    output = pd.merge(player_stats_df, new_scores[['match_id', 'player_name', 'score', 'minmax_score', 'percentile', 'final_score', 'position']], on = ['match_id', 'player_name'], how = 'left').dropna(subset = 'score')
+    output = pd.merge(output, matches_df[['match_id', 'season_id', 'round']], on = ['match_id'], how = 'left')[['match_id', 'player_name', 'team', 'score',  'minmax_score', 'percentile','final_score', 'position', 'season_id', 'round']]
     return output

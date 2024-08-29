@@ -1,3 +1,10 @@
 pandas==2.1.4
+plotly-express==0.4.1
 pyarrow==14.0.2
+matplotlib==3.3.4
+mplsoccer==1.4.0
+numpy==1.21.5
 requests==2.32.3
+streamlit==1.7.0
+
+
