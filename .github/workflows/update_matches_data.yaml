@@ -3,7 +3,7 @@ name: Update matches data
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '00 1 * * 1'  # At 01:00 on Mondays.
+    - cron: '00 3 * * 2'  # At 03:00 on Tuesdays.
 
 jobs:
   update:

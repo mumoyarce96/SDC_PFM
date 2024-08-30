@@ -1,9 +1,10 @@
 name: Update player positions data
 
 on:
-  workflow_dispatch: {}
-  schedule:
-    - cron: '00 1 * * 1'  # At 01:00 on Mondays.
+  workflow_run:
+    workflows: ["Update player stats data"]  # Nombre del workflow anterior
+    types:
+      - completed  # Se ejecutará cuando el workflow anterior se complete con éxito
 
 jobs:
   update:
@@ -11,10 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # update stats
+      # Setup Python
       - uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+
       - name: cache pip
         uses: actions/cache@v2
         with:
@@ -22,11 +24,14 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
       - run: pip install -r requirements.txt
+
       - run: python update_player_positions_data.py
         env:
           OAUTH_TOKEN: ${{ secrets.GH_API_TOKEN }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
+
       - run: |
           git config user.name 'GitHub Actions'
           git config user.email 'actions@users.noreply.github.com'

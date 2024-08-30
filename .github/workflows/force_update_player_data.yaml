@@ -1,21 +1,23 @@
-name: Update player stats data
+name: Force Player Data Update
 
 on:
   workflow_run:
-    workflows: ["Update matches data"]  # Nombre del workflow anterior
+    workflows: ["Update player stats data"]  # Nombre del workflow anterior
     types:
-      - completed  # Se ejecutará cuando el workflow anterior se complete con éxito
+      - completed  # Se ejecutará cuando el workflow anterior se complete
 
 jobs:
   update:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
 
-      # update stats
+      # Setup Python
       - uses: actions/setup-python@v2
         with:
           python-version: '3.9'
+
       - name: cache pip
         uses: actions/cache@v2
         with:
@@ -23,15 +25,18 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
+
       - run: pip install -r requirements.txt
-      - run: python update_player_stats_data.py
+
+      - run: python force_player_data_update.py
         env:
           OAUTH_TOKEN: ${{ secrets.GH_API_TOKEN }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
+
       - run: |
           git config user.name 'GitHub Actions'
           git config user.email 'actions@users.noreply.github.com'
           git add .
           timestamp=$(date -u)
-          git commit -m "update player stats data: ${timestamp}" || exit 0
+          git commit -m "force update player data: ${timestamp}" || exit 0
           git push

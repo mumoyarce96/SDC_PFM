@@ -7,6 +7,5 @@ previous_df = pd.read_parquet(f'data/Player Stats/{tournament_id}_player_stats.p
 previous_df_info = previous_df.groupby(['match_id']).size().reset_index().sort_values(by = 0).rename(columns={0: 'n'})
 target_match_ids = previous_df_info[previous_df_info['n'] < 30]['match_id'].tolist()
 target_matches = matches[matches['match_id'].isin(target_match_ids)]
-print(len(target_matches))
-df = get_player_stats(target_matches, previous_df, reruns = 5).drop_duplicates(subset=['match_id', 'player_id'], keep = 'last')
+df = get_player_stats(target_matches, previous_df, reruns = 15).drop_duplicates(subset=['match_id', 'player_id'], keep = 'last')
 df.to_parquet(f'data/Player Stats/{tournament_id}_player_stats.parquet')
