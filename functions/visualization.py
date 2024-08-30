@@ -36,6 +36,6 @@ def plot_lineup(round_df):
     for i, player in df.iterrows():
         plt.annotate(player['player_name'], (player['y'], player['x'] - 4), ha = 'center')
         plt.annotate(player['team'], (player['y'], player['x'] - 6), ha = 'center')
-        plt.annotate(int(np.round(player['final_score'], 0)), (player['y'], player['x']), ha = 'center', va = 'center', color = 'k', size = 14)
+        plt.annotate(int(np.round(player['percentile'], 0)), (player['y'], player['x']), ha = 'center', va = 'center', color = 'k', size = 14)
     fig.set_facecolor(PITCH_COLOR)
     return fig

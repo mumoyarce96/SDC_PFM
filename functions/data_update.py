@@ -63,7 +63,7 @@ def save_matches_info(tournament_id, season_ids):
       try: 
           previous_matches = pd.read_parquet(f"data/Matches/{tournament_id}_matches.parquet")
           matches = get_matches_info(tournament_id, season_id)
-          final_matches = pd.concat([matches, previous_matches]).drop_duplicates()
+          final_matches = pd.concat([matches, previous_matches], join="outer").drop_duplicates()
           final_matches.to_parquet(f"data/Matches/{tournament_id}_matches.parquet")
       except:
           matches = get_matches_info(tournament_id, season_id)
@@ -112,38 +112,42 @@ def parse_player_data_response(dfs, response, match_id, home_team, away_team):
       return dfs
 
 def get_match_player_stats(dfs, matches, match_id):
-        response = requests.request("GET", f'https://api.sofascore.com/api/v1/event/{match_id}/lineups', headers = headers, data = {})
-        match_info = matches[matches['match_id'] == match_id].iloc[0]
-        home_team = match_info['home_team']
-        away_team = match_info['away_team']
-        dfs = parse_player_data_response(dfs, response, match_id, home_team, away_team)
-        return dfs
+        try:
+          response = requests.request("GET", f'https://api.sofascore.com/api/v1/event/{match_id}/lineups', headers = headers, data = {})
+          match_info = matches[matches['match_id'] == match_id].iloc[0]
+          home_team = match_info['home_team']
+          away_team = match_info['away_team']
+          dfs = parse_player_data_response(dfs, response, match_id, home_team, away_team)
+          return dfs
+        except:
+          return dfs
 
 def get_player_stats(matches, previous_df, reruns = 0):
       dfs = []
       match_ids = matches['match_id'].unique()
-      for match_id in match_ids:
+      for n_match, match_id in enumerate(match_ids):
           get_match_player_stats(dfs, matches, match_id)
           time.sleep(random.uniform(0.8, 1.2))
           for i in range(reruns):
               get_match_player_stats(dfs, matches, match_id)
               time.sleep(random.uniform(0.5, 1))
       if len(dfs) > 0:
-        print(len(dfs))
-        df = pd.concat(dfs, ignore_index = True)
+        df = pd.concat(dfs, ignore_index = True, join="outer")
         cols = ['player_id', 'player_position', 'player_name']
         for col in cols:
             first_column = df.pop(col)
             df.insert(0, col, first_column)
-        df = pd.concat([previous_df, df]).drop_duplicates(subset = ['match_id', 'player_name'], keep = 'last').reset_index(drop = True)
+        df = pd.concat([previous_df, df], join="outer").drop_duplicates(subset = ['match_id', 'player_name'], keep = 'last').reset_index(drop = True)
         df = df.fillna(0)
         return df
       else: 
         return previous_df
 
-def save_player_stats(tournament_id, season_id):
+def save_player_stats(tournament_id, season_id, reruns = 0):
       previous_df, matches = get_new_matches(tournament_id, season_id)
-      df = get_player_stats(matches, previous_df).dropna(subset = 'player_name')
+      df = get_player_stats(matches, previous_df, reruns = reruns).dropna(subset = 'player_name')
+      if 'formation' in df.columns:
+          df = df.drop('formation', axis = 1)
       df.to_parquet(f"data/Player Stats/{tournament_id}_player_stats.parquet")
 
 def save_player_positions(tournament_id, season_id):
@@ -169,5 +173,5 @@ def save_player_positions(tournament_id, season_id):
       df = pd.DataFrame({'player_id': fetched_player_ids,
                         'positions': positions})
       df['fecha_carga'] = pd.to_datetime('today')
-      df = pd.concat([previous_df, df]).sort_values(by = 'fecha_carga').drop_duplicates(subset = 'player_id', keep = 'last')
+      df = pd.concat([previous_df, df], join="outer").sort_values(by = 'fecha_carga').drop_duplicates(subset = 'player_id', keep = 'last')
       df.to_parquet(f"data/Player Positions/{tournament_id}_player_positions.parquet")

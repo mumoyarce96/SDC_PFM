@@ -16,7 +16,7 @@ season_ids_map = dict(zip(leagues_information['temporada'], leagues_information[
 seasons = leagues_information['temporada'].unique().tolist()
 season = st.selectbox("Temporada", seasons, index = max_index(seasons))
 season_id = season_ids_map[season]
-rounds = df[df['season_id'] == season_id]['round'].unique().tolist()
+rounds = df[df['season_id'] == season_id].sort_values(by = 'round')['round'].unique().tolist()
 round = st.selectbox("Fecha", rounds, index = max_index(rounds))
 
 fantasy_team = df[(df['season_id'] == season_id) & (df['round'] == round)]

@@ -13,12 +13,12 @@ for key in formations_dict.keys():
 
 def get_best_position_player(df, position):
   df = df[df['position'] == position]
-  df = df.sort_values(by = 'final_score', ascending = False).head(1)
+  df = df.sort_values(by = 'percentile', ascending = False).head(1)
   return df
 
 def get_best_11(df, positions):
    df = df[df['position'].isin(positions)]
-   df = df.sort_values(by = 'final_score', ascending = False)
+   df = df.sort_values(by = 'percentile', ascending = False)
    output_df = pd.DataFrame(columns = df.columns)
    for position in positions:
        temp_df = df[df['player_name'].isin(output_df['player_name']) == False]
@@ -28,7 +28,7 @@ def get_best_11(df, positions):
 def get_best_score(df, formation_name, formations_dict):
    positions = formations_dict[formation_name]['sofascore_positions']
    formation = get_best_11(df, positions)
-   score = formation['final_score'].mean()
+   score = formation['percentile'].mean()
    return formation, score
 
 def get_best_lineup(df):
@@ -58,9 +58,9 @@ def get_new_fantasy_teams(df):
    fantasy_teams = pd.DataFrame(columns = df.columns)
    for season_id in df['season_id'].unique():
         season_df = df[df['season_id'] == season_id]
-   for round in season_df['round'].unique():
-        round_df = season_df[season_df['round'] == round]
-        temp_df = get_best_lineup(round_df)
-        fantasy_teams = pd.concat([fantasy_teams, temp_df[0]], ignore_index=True)
+        for round in season_df['round'].unique():
+              round_df = season_df[season_df['round'] == round]
+              temp_df = get_best_lineup(round_df)
+              fantasy_teams = pd.concat([fantasy_teams, temp_df[0]], ignore_index=True)
    fantasy_teams = add_suffix_to_duplicates(fantasy_teams)
    return fantasy_teams
