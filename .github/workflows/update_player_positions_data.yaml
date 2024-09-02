@@ -2,7 +2,7 @@ name: Update player positions data
 
 on:
   workflow_run:
-    workflows: ["Update player stats data"]  # Nombre del workflow anterior
+    workflows: ["Force Player Data Update"]  # Nombre del workflow anterior
     types:
       - completed  # Se ejecutará cuando el workflow anterior se complete con éxito
 
