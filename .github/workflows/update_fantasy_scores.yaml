@@ -5,7 +5,7 @@ on:
     workflows: ["Update player positions data"]  # Nombre del workflow anterior
     types:
       - completed  # Se ejecutará cuando el workflow anterior se complete
-
+  workflow_dispatch:
 jobs:
   update:
     runs-on: ubuntu-latest
