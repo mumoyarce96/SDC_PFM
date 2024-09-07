@@ -5,7 +5,7 @@ on:
     workflows: ["Force Player Data Update"]  # Nombre del workflow anterior
     types:
       - completed  # Se ejecutará cuando el workflow anterior se complete con éxito
-
+  workflow_dispatch:
 jobs:
   update:
     runs-on: ubuntu-latest
